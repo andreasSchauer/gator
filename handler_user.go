@@ -10,6 +10,23 @@ import (
 )
 
 
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't list users: %v", err)
+	}
+
+	for _, user := range users {
+		if user == s.cfg.CurrentUserName {
+			user += " (current)"
+		}
+		fmt.Println(user)
+	}
+
+	return nil
+}
+
+
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <name>", cmd.name)
