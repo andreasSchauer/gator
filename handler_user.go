@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
+
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <name>", cmd.name)
