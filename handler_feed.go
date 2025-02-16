@@ -40,18 +40,13 @@ func handlerFeeds(s *state, cmd command) error {
 
 
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
 		return fmt.Errorf("usage: %v <feedName> <feedURL>", cmd.name)
 	}
 	
 	feedName := cmd.args[0]
 	feedURL := cmd.args[1]
-
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
-	}
 
 	feedParams := database.CreateFeedParams{
 		ID: uuid.New(),
