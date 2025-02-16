@@ -10,10 +10,11 @@ import (
 )
 
 
+
 func handlerUsers(s *state, cmd command) error {
 	users, err := s.db.GetUsers(context.Background())
 	if err != nil {
-		return fmt.Errorf("couldn't list users: %v", err)
+		return fmt.Errorf("couldn't list users: %w", err)
 	}
 
 	for _, user := range users {

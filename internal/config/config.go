@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -31,12 +30,12 @@ func Read() (Config, error) {
 
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
-		return Config{}, fmt.Errorf("file doesn't exist: %v", err)
+		return Config{}, err
 	}
 
 	var cfg = Config{}
 	if err = json.Unmarshal(data, &cfg); err != nil {
-		return Config{}, fmt.Errorf("problem decoding json: %v", err)
+		return Config{}, err
 	}
 
 	return cfg, nil
@@ -61,12 +60,12 @@ func write (cfg Config) error {
 
 	data, err := json.Marshal(cfg)
 	if err != nil {
-		return fmt.Errorf("problem encoding json: %v", err)
+		return err
 	}
 
 	err = os.WriteFile(configFilePath, data, 0600)
 	if err != nil {
-		return fmt.Errorf("problem writing to config file: %v", err)
+		return err
 	}
 
 	return nil
