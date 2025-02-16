@@ -14,12 +14,12 @@ func handlerAgg(_ *state, _ command) error {
 		return fmt.Errorf("couldn't fetch feed: %w", err)
 	}
 
-	printFeed(feed)
+	printRSSFeed(feed)
 	return nil
 }
 
 
-func printFeed(feed *RSSFeed) {
+func printRSSFeed(feed *RSSFeed) {
 	fmt.Println("==== RSS Feed ====")
 	fmt.Printf("Channel: %s\n", feed.Channel.Title)
 	fmt.Printf("Description: %s\n", feed.Channel.Description)
