@@ -1,7 +1,5 @@
 package main
 
-import _ "github.com/lib/pq"
-
 import (
 	"database/sql"
 	"fmt"
@@ -10,13 +8,13 @@ import (
 
 	"github.com/andreasSchauer/gator/internal/config"
 	"github.com/andreasSchauer/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
-	db		*database.Queries
-	cfg		*config.Config
+	db  *database.Queries
+	cfg *config.Config
 }
-
 
 func main() {
 	cfg, err := config.Read()
@@ -30,10 +28,9 @@ func main() {
 	}
 
 	appState := &state{
-		db: 	database.New(db),
-		cfg: 	&cfg,
+		db:  database.New(db),
+		cfg: &cfg,
 	}
-
 
 	cmds := commands{
 		registeredCommands: make(map[string]func(*state, command) error),
@@ -46,6 +43,8 @@ func main() {
 	cmds.register("agg", handlerAgg)
 	cmds.register("addfeed", handlerAddFeed)
 	cmds.register("feeds", handlerFeeds)
+	cmds.register("follow", handlerFollow)
+	cmds.register("following", handlerFollowing)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: cli <command> [args...]")
