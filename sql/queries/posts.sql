@@ -14,8 +14,9 @@ RETURNING *;
 
 
 -- name: GetPostsForUser :many
-SELECT title, url, description, published_at FROM posts
+SELECT posts.*, feeds.name AS feed_name FROM posts
 INNER JOIN feed_follows ON feed_follows.feed_id = posts.feed_id
+INNER JOIN feeds ON posts.feed_id = feeds.id
 WHERE feed_follows.user_id = $1
 ORDER BY posts.published_at DESC
 LIMIT $2;

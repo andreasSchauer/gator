@@ -39,18 +39,18 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 
 	posts, err := s.db.GetPostsForUser(context.Background(), params)
 	if err != nil {
-		return fmt.Errorf("couldn't log posts: %w", err)
+		return fmt.Errorf("couldn't get posts for user %s: %w", user.Name, err)
 	}
 
-	fmt.Println("Listing Posts:")
+	fmt.Printf("Found %d posts for user %s:\n", len(posts), user.Name)
 	fmt.Println()
 	
 	for _, post := range posts {
-		fmt.Printf("* Title: %s\n", post.Title)
-		fmt.Printf("* Published At: %v\n", post.PublishedAt.Time)
-		fmt.Printf("* URL: %s\n", post.Url)
-		fmt.Printf("* Description: %v\n", post.Description.String)
-		fmt.Println()
+		fmt.Printf("* Published At: %v from %s\n", post.PublishedAt.Time.Format("Mon 2006-01-02 15:04:05"), post.FeedName)
+		fmt.Printf("* --- %s ---\n", post.Title)
+		fmt.Printf("* Link: %s\n", post.Url)
+		fmt.Printf("* 	%v\n", post.Description.String)
+		fmt.Printf("\n\n")
 	}
 
 	return nil

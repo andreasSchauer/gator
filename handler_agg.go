@@ -76,7 +76,7 @@ func scrapeFeeds(s *state) {
 
 
 func saveRssItemAsPost(s *state, item RSSItem, feedID uuid.UUID) error {
-	postPublishDate, publishedAtValid, err := evaluatePubDate(item)
+	publishedAt, err := evaluatePubDate(item)
 	if err != nil {
 		return err
 	}
@@ -91,10 +91,7 @@ func saveRssItemAsPost(s *state, item RSSItem, feedID uuid.UUID) error {
 			String: 	item.Description,
 			Valid:		item.Description != "",
 		},
-		PublishedAt: 	sql.NullTime{
-			Time: 		postPublishDate,
-			Valid:		publishedAtValid,
-		},
+		PublishedAt: 	publishedAt,
 		FeedID: 		feedID,
 	}
 	
@@ -102,24 +99,31 @@ func saveRssItemAsPost(s *state, item RSSItem, feedID uuid.UUID) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
 			return nil
-		} else {
-			return fmt.Errorf("couldn't create post with title %s: %v", item.Title, err)
-		}
+		} 
+		return fmt.Errorf("couldn't create post with title %s: %v", item.Title, err)
 	}
 
 	return nil
 }
 
 
-func evaluatePubDate(item RSSItem) (postPublishDate time.Time, publishedAtValid bool, err error) {
+func evaluatePubDate(item RSSItem) (sql.NullTime, error) {
+	var postPublishDate time.Time
+	var publishedAtValid bool
+	
 	if item.PubDate != "" {
 		parsedTime, err := time.Parse(time.RFC1123Z, item.PubDate)
 		if err != nil {
-			return postPublishDate, publishedAtValid, fmt.Errorf("couldn't parse publish date of post %s: %v", item.Title, err)
+			return sql.NullTime{}, fmt.Errorf("couldn't parse publish date of post %s: %v", item.Title, err)
 		}
 		postPublishDate = parsedTime
 		publishedAtValid = true
 	}
 
-	return postPublishDate, publishedAtValid, nil
+	publishedAt := sql.NullTime{
+		Time: 		postPublishDate,
+		Valid:		publishedAtValid,
+	}
+
+	return publishedAt, nil
 }
