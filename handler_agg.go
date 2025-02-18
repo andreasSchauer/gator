@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/andreasSchauer/gator/internal/database"
+	"github.com/google/uuid"
 )
 
 
@@ -63,8 +65,61 @@ func scrapeFeeds(s *state) {
 	}
 
 	for _, item := range feed.Channel.Item {
-		fmt.Printf("Found post: %s\n", item.Title)
+		err := saveRssItemAsPost(s, item, nextFeed.ID)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	fmt.Printf("Feed %s collected, %v posts found\n", nextFeed.Name, len(feed.Channel.Item))
+}
+
+
+func saveRssItemAsPost(s *state, item RSSItem, feedID uuid.UUID) error {
+	postPublishDate, publishedAtValid, err := evaluatePubDate(item)
+	if err != nil {
+		return err
+	}
+	
+	postParams := database.CreatePostParams{
+		ID:				uuid.New(),
+		CreatedAt: 		time.Now().Local(),
+		UpdatedAt: 		time.Now().Local(),
+		Title:			item.Title,
+		Url: 			item.Link,
+		Description:	sql.NullString{
+			String: 	item.Description,
+			Valid:		item.Description != "",
+		},
+		PublishedAt: 	sql.NullTime{
+			Time: 		postPublishDate,
+			Valid:		publishedAtValid,
+		},
+		FeedID: 		feedID,
+	}
+	
+	_ , err = s.db.CreatePost(context.Background(), postParams)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			return nil
+		} else {
+			return fmt.Errorf("couldn't create post with title %s: %v", item.Title, err)
+		}
+	}
+
+	return nil
+}
+
+
+func evaluatePubDate(item RSSItem) (postPublishDate time.Time, publishedAtValid bool, err error) {
+	if item.PubDate != "" {
+		parsedTime, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			return postPublishDate, publishedAtValid, fmt.Errorf("couldn't parse publish date of post %s: %v", item.Title, err)
+		}
+		postPublishDate = parsedTime
+		publishedAtValid = true
+	}
+
+	return postPublishDate, publishedAtValid, nil
 }
