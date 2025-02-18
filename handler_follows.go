@@ -12,7 +12,7 @@ import (
 
 func handlerUnfollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
-		return fmt.Errorf("usage: %v <feed_url>", cmd.name)
+		return fmt.Errorf("usage: %v <feedUrl>", cmd.name)
 	}
 
 	feedURL := cmd.args[0]
@@ -42,7 +42,7 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 
 func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
-		return fmt.Errorf("usage: %v <feed_url>", cmd.name)
+		return fmt.Errorf("usage: %v <feedUrl>", cmd.name)
 	}
 
 	feedURL := cmd.args[0]
